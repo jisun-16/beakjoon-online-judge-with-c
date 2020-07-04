@@ -8,13 +8,25 @@ using namespace std;
 int inf=987654321;
 int knx[]={-2,-2,-1,-1,1,1,2,2},kny[]={-1,1,-2,2,-2,2,-1,1},bx[]={-1,-1,1,1},by[]={-1,1,-1,1},rx[]={-1,0,1,0},ry[]={0,-1,0,1};
 
-int n,map[11][11],dist[11][11][101][3];//knight,bishop,rook
+int n,map[11][11];
+pair<int,int> dist[11][11][101][3];//knight,bishop,rook
 pair<int,int> piece[3];
 
 bool avail(int x,int y){ return x>0&&x<=n&&y>0&&y<=n; }
 
+bool operator<(pair<int,int> a,pair<int,int> b){
+	if(a.first<b.first) return true;
+	else if(a.first==b.first)
+		if(a.second<b.second) return true;
+	return false;
+}
+
 int main(){
-	memset(dist,-1,sizeof(dist));
+	for(int i=0;i<11;i++)
+		for(int j=0;j<11;j++)
+			for(int k=0;k<101;k++)
+				for(int l=0;l<3;l++)
+					dist[i][j][k][l]={-1,-1};
 	
 	cin>>n;
 	for(int i=1;i<=n;i++){
@@ -30,10 +42,11 @@ int main(){
 	//piece.x,piece.y,check_number,piece_number
 	for(int i=0;i<3;i++){
 		q.push({{piece[i]},{1,i}});
-		dist[piece[i].first][piece[i].second][1][i]=0;
+		dist[piece[i].first][piece[i].second][1][i]={0,0};
 	}
 	
-	int ans=inf;
+	pair<int,int> ans;
+	ans.first=ans.second=inf;
 	while(!q.empty()){
 		int x=q.front().first.first;
 		int y=q.front().first.second;
@@ -42,18 +55,10 @@ int main(){
 		q.pop();
 		
 		if(chk==n*n){
-			if(ans>dist[x][y][chk][p]) ans=dist[x][y][chk][p];
+			if(ans.first>dist[x][y][chk][p].first) ans=dist[x][y][chk][p];
+			else if(ans.first==dist[x][y][chk][p].first&&ans.second>dist[x][y][chk][p].second) ans=dist[x][y][chk][p];
 		}
 		
-		//가만히 있고 말을 바꿀 때 
-		for(int i=0;i<3;i++){
-			if(i==p) continue;
-			
-			if(dist[x][y][chk][i]==-1){
-				dist[x][y][chk][i]=dist[x][y][chk][p]+1;
-				q.push({{x,y},{chk,i}});
-			}
-		}
 		
 		//knight
 		if(p==0){
@@ -65,8 +70,8 @@ int main(){
 				int nchk=chk;
 				if(map[nx][ny]==chk+1) nchk++;
 				
-				if(dist[nx][ny][nchk][0]==-1){
-					dist[nx][ny][nchk][0]=dist[x][y][chk][p]+1;
+				if(dist[nx][ny][nchk][0].first==-1){
+					dist[nx][ny][nchk][0]={dist[x][y][chk][p].first+1,dist[x][y][chk][p].second};
 					q.push({{nx,ny},{nchk,0}});
 				}
 			}
@@ -82,8 +87,8 @@ int main(){
 					int nchk=chk;
 					if(map[nx][ny]==chk+1) nchk++;
 					
-					if(dist[nx][ny][nchk][1]==-1){
-						dist[nx][ny][nchk][1]=dist[x][y][chk][p]+1;
+					if(dist[nx][ny][nchk][1].first==-1){
+						dist[nx][ny][nchk][1]={dist[x][y][chk][p].first+1,dist[x][y][chk][p].second};
 						q.push({{nx,ny},{nchk,1}});
 					}
 				}
@@ -100,14 +105,24 @@ int main(){
 					int nchk=chk;
 					if(map[nx][ny]==chk+1) nchk++;
 					
-					if(dist[nx][ny][nchk][2]==-1){
-						dist[nx][ny][nchk][2]=dist[x][y][chk][p]+1;
+					if(dist[nx][ny][nchk][2].first==-1){
+						dist[nx][ny][nchk][2]={dist[x][y][chk][p].first+1,dist[x][y][chk][p].second};
 						q.push({{nx,ny},{nchk,2}});
 					}
 				}
 			}
 		}
+		
+		//가만히 있고 말을 바꿀 때 
+		for(int i=0;i<3;i++){
+			if(i==p) continue;
+			
+			if(dist[x][y][chk][i].first==-1){
+				dist[x][y][chk][i]={dist[x][y][chk][p].first+1,dist[x][y][chk][p].second+1};
+				q.push({{x,y},{chk,i}});
+			}
+		}
 	}
 	
-	cout<<ans<<'\n';
+	cout<<ans.first<<' '<<ans.second<<'\n';
 }
