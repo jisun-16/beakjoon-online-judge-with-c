@@ -1,18 +1,13 @@
 #include<iostream>
 #include<algorithm>
 #include<string>
-#include<queue>
 #include<vector>
 
 using namespace std;
 
-const int dx[]={-1,0},dy[]={0,-1};
 int n,m,k;
 string row[26],map;
-
-bool _avail(int a,int b){
-	return a>=0&&a<n&&b>=0&&b<m;
-}
+long long ans;
 
 int main(){
 	
@@ -20,35 +15,38 @@ int main(){
 	for(int i=0;i<k;i++) cin>>row[i];
 	cin>>map;
 
-	int ans=1;
-	queue<pair<int,int> > q;
-	q.push({n-1,m-1});
-	while(!q.empty()){
-		int temp=q.size();
-		bool visited[m]={false,};
-		
-		while(temp--){
-			int x=q.front().first,y=q.front().second;
-			q.pop();
-			
-			for(int i=0;i<2;i++){
-				int nx=x+dx[i],ny=y+dy[i];
-				
-				if(!_avail(nx,ny)) continue;
-				if(visited[ny]) continue;
-				
-				if(i==0&&row[map[nx]-'A'][ny]=='U'){
-					ans++;
-					visited[ny]=true;
-					q.push({nx,ny});
-				}
-				if(i==1&&row[map[nx]-'A'][ny]=='R'){
-					ans++;
-					visited[ny]=true;
-					q.push({nx,ny});
-				}
-			}
+	int s=0,e=m-1;
+	int now=map[n-1]-'A';
+	for(int i=m-2;i>=0;i--)
+		if(row[now][i]=='U'){
+			s=i+1;
+			break;
 		}
+	
+	ans+=(long long)e-s+1;
+	
+	for(int i=n-2;i>=0;i--){
+		//cout<<s<<' '<<e<<'\n';
+		bool chk=false;
+		now=map[i]-'A';
+		for(int j=e;j>=s;j--)
+			if(row[now][j]=='U'){
+				chk=true;
+				e=j;
+				break;
+			}
+		
+		if(!chk) break;
+		
+		for(int j=s-1;j>=0;j--)
+			if(row[now][j]=='U'){
+				chk=false;
+				s=j+1;
+				break;
+			}
+		if(chk) s=0;
+		
+		ans+=(long long)e-s+1;
 	}
 	
 	cout<<ans<<'\n';
